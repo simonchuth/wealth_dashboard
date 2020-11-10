@@ -2,6 +2,7 @@ import streamlit as st
 import SessionState
 
 from datetime import date
+from random import sample 
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,7 +10,6 @@ import matplotlib.pyplot as plt
 from wealth import WealthManager
 
 from utils import download_link, wrap_text, today
-
 
 import json
 
@@ -52,6 +52,7 @@ if action == 'Home':
     total_investment_list = []
     profit_list = []
     platform_list = []
+    maturity_list = []
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
@@ -64,6 +65,7 @@ if action == 'Home':
             cur_val_list.append(ss.wealth_manager.get_fund_cur_val(fund_name))
             total_investment_list.append(ss.wealth_manager.get_fund_total_investment(fund_name))
             profit_list.append(ss.wealth_manager.get_fund_profit(fund_name))
+            maturity_list.append(ss.wealth_manager.get_fund_maturity(fund_name))
 
         home_df = {'Fund Name': fund_list,
                    'Current Value': cur_val_list,
@@ -91,11 +93,45 @@ if action == 'Home':
             processed_fund_names.append(processed_text)
 
         # Display Piechart
-        fig = plt.figure(figsize=(12,10))
-        ax = fig.gca()
+        fig1 = plt.figure(figsize=(12,10))
+        ax = fig1.gca()
         ax.pie(x=cur_val_list, autopct='%1.1f%%', labels=processed_fund_names)
-        fig.tight_layout()
-        st.pyplot(fig)
+        fig1.tight_layout()
+        st.pyplot(fig1)
+
+        # Display barchart fluid and fixed funds
+        expanded_cur_val_list = []
+        ind = [0, 1]
+        for i, fund_name in enumerate(fund_list):
+            cur_val = cur_val_list[i]
+            if maturity_list[i] is None:
+                cur_val = [cur_val, 0]
+            else:
+                cur_val = [0, cur_val]
+            expanded_cur_val_list.append(cur_val)
+
+        fig2 = plt.figure(figsize=(8,8))
+        ax = fig2.gca()
+        bottom = [0, 0]
+        hatch_list = ['/', '|', '-', '+', 'x', 'o', 'O', '.', '*']
+        for i, cur_val in enumerate(expanded_cur_val_list):
+            hatch_pattern = sample(hatch_list, 1)[0]
+            ax.bar(ind, cur_val, bottom=bottom, label=fund_list[i], hatch=hatch_pattern)
+            bottom[0] += cur_val[0]
+            bottom[1] += cur_val[1]
+        plt.xlim((-0.5, 3.5))
+        fig2.legend()
+        ax.spines['left'].set_color('white')
+        ax.spines['top'].set_color('white')
+        ax.spines['right'].set_color('white')
+        ax.spines['bottom'].set_color('white')
+        ax.set_xticks(ind)
+        ax.set_xticklabels(['FLuid funds', 'Fixed funds'])
+        fig2.tight_layout()
+
+        st.pyplot(fig2)
+
+        st.button('Refresh')
 
         st.write(home_df)
 
