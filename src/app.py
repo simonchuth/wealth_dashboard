@@ -4,7 +4,6 @@ import SessionState
 from datetime import date
 
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 
 from wealth import WealthManager
