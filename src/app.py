@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from wealth import WealthManager
 
-from utils import download_link, wrap_text
+from utils import download_link, wrap_text, today
 
 
 import json
@@ -236,8 +236,11 @@ elif action == 'Import/Export Data':
     json_export = ss.wealth_manager.export_data()
 
     st.subheader('Export Data')
+
+    today_date = today()
+
     export_link = download_link(json_export,
-                                'wealth_manager.json',
+                                f'wealth_manager_{today_date}.json',
                                 'Download json data')
 
     st.markdown(export_link, unsafe_allow_html=True)
