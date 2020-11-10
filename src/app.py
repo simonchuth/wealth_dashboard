@@ -229,6 +229,8 @@ elif action == 'Edit Fund Information':
 
 elif action == 'Import/Export Data':
 
+    uploaded_file = None
+
     st.header('Update Current Valuation of funds')
 
     json_export = ss.wealth_manager.export_data()
