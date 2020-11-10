@@ -74,10 +74,11 @@ if action == 'Home':
             processed_text = wrap_text(fund_name, max_char)
             processed_fund_names.append(processed_text)
 
-        plt.figure(figsize=(12,10))
-        plt.pie(x=cur_val_list, autopct='%1.1f%%', labels=processed_fund_names)
-        plt.tight_layout()
-        st.pyplot()
+        fig = plt.figure(figsize=(12,10))
+        ax = fig.gca()
+        ax.pie(x=cur_val_list, autopct='%1.1f%%', labels=processed_fund_names)
+        fig.tight_layout()
+        st.pyplot(fig)
 
         st.write(home_df)
 
