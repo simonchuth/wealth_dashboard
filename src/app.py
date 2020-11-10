@@ -13,6 +13,21 @@ from utils import download_link, wrap_text, today
 
 import json
 
+
+def data_loader():
+    uploaded_file = None
+
+    st.subheader('Import Data')
+
+    uploaded_file = st.file_uploader("Choose a file", type=['json'])
+
+    if uploaded_file is not None:
+        data_dict = json.load(uploaded_file)
+        ss.wealth_manager.import_data(data_dict)
+        st.success('Data Loaded')
+        st.button('OK')
+
+
 ss = SessionState.get(wealth_manager=None, max_char_slider=False, max_char=30)
 
 st.title('Wealth Management Dashboard')
@@ -40,6 +55,8 @@ if action == 'Home':
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
+
+        data_loader()
     else:
 
         for fund_name in fund_list:
@@ -49,7 +66,6 @@ if action == 'Home':
             profit_list.append(ss.wealth_manager.get_fund_profit(fund_name))
 
         home_df = {'Fund Name': fund_list,
-                   'Platform': platform_list,
                    'Current Value': cur_val_list,
                    'Total Investment': total_investment_list,
                    'Profit': profit_list}
@@ -74,6 +90,7 @@ if action == 'Home':
             processed_text = wrap_text(fund_name, max_char)
             processed_fund_names.append(processed_text)
 
+        # Display Piechart
         fig = plt.figure(figsize=(12,10))
         ax = fig.gca()
         ax.pie(x=cur_val_list, autopct='%1.1f%%', labels=processed_fund_names)
@@ -128,6 +145,8 @@ elif action == 'Deposit':
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
+
+        data_loader()
     else:
 
         fund_name = st.selectbox('Choose a fund', fund_list)
@@ -151,6 +170,8 @@ elif action == 'Withdraw':
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
+
+        data_loader()
     else:
 
         fund_name = st.selectbox('Choose a fund', fund_list)
@@ -174,6 +195,8 @@ elif action == 'Update Current Value':
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
+
+        data_loader()
     else:
 
         fund_name = st.selectbox('Choose a fund', fund_list)
@@ -194,6 +217,8 @@ elif action == 'Edit Fund Information':
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
+
+        data_loader()
     else:
 
         fund_name = st.selectbox('Choose a fund', fund_list)
@@ -245,19 +270,7 @@ elif action == 'Import/Export Data':
 
     st.markdown(export_link, unsafe_allow_html=True)
 
-    st.subheader('Import Data')
-
-    uploaded_file = st.file_uploader("Choose a file", type=['json'])
-
-    if uploaded_file is not None:
-        data_dict = json.load(uploaded_file)
-        ss.wealth_manager.import_data(data_dict)
-        st.success('Data Loaded')
-
-
-
-
-
+    data_loader()
 
 
 
