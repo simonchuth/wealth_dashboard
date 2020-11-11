@@ -96,6 +96,7 @@ if action == 'Home':
         fig1 = plt.figure(figsize=(12,10))
         ax = fig1.gca()
         ax.pie(x=cur_val_list, autopct='%1.1f%%', labels=processed_fund_names)
+        plt.title('Distribution of funds')
         fig1.tight_layout()
         st.pyplot(fig1)
 
@@ -127,6 +128,7 @@ if action == 'Home':
         ax.spines['bottom'].set_color('white')
         ax.set_xticks(ind)
         ax.set_xticklabels(['FLuid funds', 'Fixed funds'])
+        plt.ylabel('Amount ($)')
         fig2.tight_layout()
 
         st.pyplot(fig2)
