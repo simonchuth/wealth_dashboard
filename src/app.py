@@ -6,6 +6,7 @@ from random import sample
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from wealth import WealthManager
 
@@ -36,7 +37,8 @@ if ss.wealth_manager is None:
     ss.wealth_manager = WealthManager()
 
 action = st.selectbox('Choose an action', ('Home',
-                                           'Create new funds',
+                                           'Funds details',
+                                           'Create new fund',
                                            'Deposit',
                                            'Withdraw',
                                            'Update Current Value',
@@ -61,7 +63,6 @@ if action == 'Home':
     else:
 
         for fund_name in fund_list:
-            platform_list.append(ss.wealth_manager.get_fund_platform(fund_name))
             cur_val_list.append(ss.wealth_manager.get_fund_cur_val(fund_name))
             total_investment_list.append(ss.wealth_manager.get_fund_total_investment(fund_name))
             profit_list.append(ss.wealth_manager.get_fund_profit(fund_name))
@@ -73,9 +74,6 @@ if action == 'Home':
                    'Profit': profit_list}
 
         home_df = pd.DataFrame(home_df)
-        home_df[['Current Value', 'Total Investment', 'Profit']] = home_df[['Current Value', 'Total Investment', 'Profit']].astype('int')
-
-        processed_fund_names = [fund_name if len(fund_name) < 30 else fund_name.replace(' ', '\n') for fund_name in fund_list]
 
         processed_fund_names = []
 
@@ -135,14 +133,75 @@ if action == 'Home':
 
         st.button('Refresh')
 
-        st.write(home_df)
+        st.write(home_df.style.format({'Current Value': '${:.2f}',
+                                       'Total Investment': '${:.2f}',
+                                       'Profit': '${:.2f}'}))
 
         total_wealth = home_df['Current Value'].sum()
-        st.write(f'Total Wealth = ${total_wealth}')
+        st.write(f'Total Wealth = ${"{:.2f}".format(total_wealth)}')
 
-elif action == 'Create new funds':
+elif action == 'Funds details':
+    st.header('Funds details')
 
-    st.header('Create new funds')
+    if len(fund_list) == 0:
+        st.write('No funds have been added yet, please add new funds or load data')
+
+        data_loader()
+    else:
+
+        fund_name = st.selectbox('Choose a fund', fund_list)
+
+        platform = ss.wealth_manager.get_fund_platform(fund_name)
+        cur_val = ss.wealth_manager.get_fund_cur_val(fund_name)
+        total_investment = ss.wealth_manager.get_fund_total_investment(fund_name)
+        profit = ss.wealth_manager.get_fund_profit(fund_name)
+        maturity = ss.wealth_manager.get_fund_maturity(fund_name)
+
+        st.markdown(f'**Fund Name: ** {fund_name}')
+        st.markdown(f'**Platform: ** {platform}')
+        st.markdown(f'**Current Valuation: ** {cur_val}')
+        st.markdown(f'**Total Investment: ** {total_investment}')
+
+        if profit >= 0:
+            st.markdown(f'**Profit/Loss: ** {profit}')
+        else:
+            st.markdown(f'**Profit/Loss: ** <span style="color:red">{profit}</span>', unsafe_allow_html=True)
+
+        if maturity is not None:
+            st.markdown(f'**Maturity: ** {maturity}')
+        else:
+            st.markdown(f'**Maturity: ** Non applicable')
+
+        val_history_df = ss.wealth_manager.get_fund_history_df(fund_name)
+        transact_history_df = ss.wealth_manager.get_fund_transaction_df(fund_name)
+
+        freq = st.selectbox('Frequency', ['Day', 'Month', 'Year'])
+        freq_dict = {'Day': 'D',
+                     'Month': 'M',
+                     'Year': 'Y'}
+        freq = freq_dict[freq]
+
+        val_history_df = val_history_df.resample(freq).bfill()
+        val_history_df['Total Investment'] = total_investment
+
+        val_history_df.plot()
+        try:
+            plt.ylim((0,val_history_df.Valuation.max()))
+        except ValueError:
+            st.error('Not enough data for the selected frequency')
+        plt.ylabel('Valuation ($)')
+        plt.xlabel('Time ($)')
+        st.pyplot()
+
+        st.write('Valuation History')
+        st.write(val_history_df.style.format({'Valuation': '${:.2f}'}))
+        st.write('Transaction History')
+        st.write(transact_history_df.style.format({'Amount': '${:.2f}'}))
+
+
+elif action == 'Create new fund':
+
+    st.header('Create new fund')
 
     fund_name = st.text_input('Fund Name')
     remarks = st.text_input('Remarks')
