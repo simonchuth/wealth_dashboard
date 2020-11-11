@@ -4,8 +4,6 @@ import pandas as pd
 
 from utils import today
 
-import streamlit as st
-
 
 class WealthManager:
     def __init__(self):
@@ -88,9 +86,6 @@ class WealthManager:
     def get_fund_transaction_df(self, fund_name):
         transaction = self.fund_dict[fund_name].transaction
         transaction_remark = self.fund_dict[fund_name].transaction_remark
-
-        st.write(transaction_remark)
-        st.write(transaction)
 
         date_list = []
         amt_list = []
