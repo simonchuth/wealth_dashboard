@@ -1,4 +1,7 @@
 import json
+
+import pandas as pd
+
 from utils import today
 
 
@@ -34,7 +37,7 @@ class WealthManager:
     def import_data(self, data_dict):
 
         for fund_name, fund_data_dict in data_dict.items():
-            fund = Funds(fund_name)
+            fund = Funds(fund_name, import_data=True)
             fund.load_data(fund_data_dict)
             self.fund_dict[fund_name] = fund
 
@@ -62,8 +65,52 @@ class WealthManager:
     def get_fund_remarks(self, fund_name):
         return self.fund_dict[fund_name].remarks
 
+    def get_fund_history_df(self, fund_name):
+        history = self.fund_dict[fund_name].history
+
+        date_list = []
+        val_list = []
+        for date, val in history.items():
+            date_list.append(date)
+            val_list.append(val)
+
+        output_df = {'Date': date_list,
+                     'Valuation': val_list}
+
+        output_df = pd.DataFrame(output_df)
+        output_df['Date']= pd.to_datetime(output_df['Date'])
+        output_df = output_df.set_index('Date')
+
+        return output_df
+
+    def get_fund_transaction_df(self, fund_name):
+        transaction = self.fund_dict[fund_name].transaction
+        transaction_remark = self.fund_dict[fund_name].transaction_remark
+
+        date_list = []
+        amt_list = []
+        remark_list = []
+        for date, amt in transaction.items():
+            date_list.append(date)
+            amt_list.append(amt)
+            try:
+                remark_list.append(transaction_remark[date])
+            except KeyError:
+                remark_list.append('')
+
+        output_df = {'Date': date_list,
+                     'Amount': amt_list,
+                     'Remarks': remark_list}
+
+        output_df = pd.DataFrame(output_df)
+        output_df['Date']= pd.to_datetime(output_df['Date'])
+        output_df = output_df.set_index('Date')
+
+        return output_df
+
+
 class Funds:
-    def __init__(self, name, remarks=None, platform=None, initial_investment=None, maturity=None):
+    def __init__(self, name, remarks=None, platform=None, initial_investment=None, maturity=None, import_data=False):
         self.name = name
         self.remarks = remarks
         self.platform = platform
@@ -74,9 +121,14 @@ class Funds:
             maturity = str(maturity)
         self.maturity = maturity
 
-        self.transaction = {today(): initial_investment}
-        self.transaction_remark = {today(): 'Funds Created'}
-        self.history = {today(): initial_investment}
+        if import_data:
+            self.transaction = {}
+            self.transaction_remark = {}
+            self.history = {}
+        else:
+            self.transaction = {today(): initial_investment}
+            self.transaction_remark = {today(): 'Funds Created'}
+            self.history = {today(): initial_investment}
 
     def update_cur_val(self, cur_value):
         self.history[today()] = cur_value
