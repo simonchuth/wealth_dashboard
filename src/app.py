@@ -30,6 +30,7 @@ def data_loader():
 
 
 ss = SessionState.get(wealth_manager=None, max_char_slider=False, max_char=30)
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 st.title('Wealth Management Dashboard')
 
