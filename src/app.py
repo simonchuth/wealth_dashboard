@@ -30,7 +30,10 @@ def data_loader():
 
 
 ss = SessionState.get(wealth_manager=None, max_char_slider=False, max_char=30)
-st.set_option('deprecation.showPyplotGlobalUse', False)
+try:
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+except Exception:
+    pass
 
 st.title('Wealth Management Dashboard')
 
@@ -351,8 +354,6 @@ elif action == 'Edit Fund Information':
  
 
 elif action == 'Import/Export Data':
-
-    uploaded_file = None
 
     st.header('Update Current Valuation of funds')
 
