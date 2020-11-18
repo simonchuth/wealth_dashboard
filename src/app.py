@@ -49,8 +49,6 @@ action = st.selectbox('Choose an action', ('Home',
                                            'Edit Fund Information',
                                            'Import/Export Data'))
 
-fund_list = ss.wealth_manager.get_funds_name_list()
-
 if action == 'Home':
     st.header('Home')
 
@@ -60,12 +58,13 @@ if action == 'Home':
     platform_list = []
     maturity_list = []
 
+    fund_list = ss.wealth_manager.get_funds_name_list(exclude_sold=True)
+
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
 
         data_loader()
     else:
-
         for fund_name in fund_list:
             cur_val_list.append(ss.wealth_manager.get_fund_cur_val(fund_name))
             total_investment_list.append(ss.wealth_manager.get_fund_total_investment(fund_name))
@@ -147,6 +146,7 @@ if action == 'Home':
 elif action == 'Funds details':
     st.header('Funds details')
 
+    fund_list = ss.wealth_manager.get_funds_name_list(exclude_sold=False)
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
 
@@ -244,6 +244,8 @@ elif action == 'Deposit':
 
     st.header('Deposit funds')
 
+    fund_list = ss.wealth_manager.get_funds_name_list(exclude_sold=True)
+
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
 
@@ -269,6 +271,8 @@ elif action == 'Withdraw':
 
     st.header('Withdraw funds')
 
+    fund_list = ss.wealth_manager.get_funds_name_list(exclude_sold=True)
+
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
 
@@ -290,9 +294,20 @@ elif action == 'Withdraw':
 
             st.success(f'${amount} withdraw from {fund_name}')
 
+        if st.button('Sell all units'):
+            ss.wealth_manager.fund_transact(fund_name,
+                                            amount,
+                                            transact_date,
+                                            transact_remark=transact_remark,
+                                            sold=True)
+
+            st.success(f'{fund_name} sold!')
+
 elif action == 'Update Current Value':
 
     st.header('Update Current Valuation of funds')
+
+    fund_list = ss.wealth_manager.get_funds_name_list(exclude_sold=True)
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
@@ -315,6 +330,8 @@ elif action == 'Update Current Value':
 elif action == 'Edit Fund Information':
 
     st.header('Edit Fund Information')
+
+    fund_list = ss.wealth_manager.get_funds_name_list(exclude_sold=False)
 
     if len(fund_list) == 0:
         st.write('No funds have been added yet, please add new funds or load data')
